@@ -1,30 +1,31 @@
 import pathlib
 from typing import Tuple
 import re
+import csv
 
+import yaml
 import numpy as np
 import numpy.typing as npt
 from scipy.fft import fft, fftfreq
 import matplotlib.pyplot as plt
 
+def get_data_csv(filename:str):
+    with open(filename, 'r+') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=' ')
+        amount_of_rows = len(list(csv_file))
+        csv_file.seek(0)
+        result = np.empty(shape=(amount_of_rows, 2), dtype=np.float64)
+        counter_row = 0
+        counter_column = 0
+        for row in csv_reader:
+            result[counter_row] = row
+            counter_row += 1
+            # except IndexError:
+                # print(row)
+        return result
 
 def get_data(filename: str) -> Tuple[list, list]:
     """ get all coordinates as list of pairs from file """
-
-    # wtf? 
-    # answer: qty of line in file
-
-    # x = np.empty([dtype=flaot)
-    # y = np.empty(dtype=flaot)
-    # with open(filename, 'r') as file:
-    #     for line in file.readlines():
-          
-
-    # - you may just iteratte by each line, and append it
-    # - we need two separate arrays for graph
-
-    # - let me write example above
-    
 
     with open(filename, 'r') as file:
         content = file.read().splitlines()
@@ -57,18 +58,25 @@ def fourier_transform(t:npt.ArrayLike,y:npt.ArrayLike):
     sth = fft(vector)
     sth3 = fftfreq(20000, )
     sth2 = np.absolute(sth)
+    sth3 = fft(y)
     print(sth)
     print(sth2)
+    print(sth3)
     plt.plot(sth2)
     plt.show()
     
 def main():
-    filename = "Fragment Full Data D1.prn"
-    t,y = get_data(filename)
-    # print(x, y, sep='\n')
-    # show_graphic(x,y)
-    fourier_transform(t,y)
-    # result = fourier_transform(x,y)
+    
+    with open("config.yaml", 'r') as config_file:
+        config = yaml.safe_load(config_file)
+        filename = config['filename']
+        data = get_data_csv(filename)
+        t, y = np.hsplit(data, 2)
+        # t,y = get_data(filename)
+        # print(x, y, sep='\n')
+        show_graphic(t ,y)
+        # fourier_transform(t,y)
+        # result = fourier_transform(x,y)
 
 if __name__ == '__main__':
     main()
